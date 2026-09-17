@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <!-- 문서 인코딩, 모바일 화면 크기, 브라우저 테마 색상 -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f5ef">
+  <title>지뢰찾기 · 한 칸씩, 차근차근</title>
+
+  <!-- 스타일과 게임 로직. defer는 HTML을 읽은 뒤 JavaScript를 실행합니다. -->
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <main class="app">
+    <!-- 1. 상단 로고와 게임 제목 -->
+    <header class="header">
+      <a class="brand" href="./index.html">
+        <span class="brand-icon" aria-hidden="true">✳</span> 작은 게임실
+      </a>
+      <span class="edition">NO. 01 — MINESWEEPER</span>
+    </header>
+
+    <section class="intro">
+      <div>
+        <p class="eyebrow">한 칸씩, 차근차근</p>
+        <h1>지뢰찾기<span>.</span></h1>
+      </div>
+      <p class="intro-note">숫자를 따라 숨은 지뢰를 찾으세요.<br>작은 추리, 기분 좋은 한 판.</p>
+    </section>
+
+    <!-- 2. 게임 영역: 도구 모음 → 점수판 → 게임판 → 상태 안내 -->
+    <section class="game" aria-label="지뢰찾기 게임">
+      <!-- data-level은 난이도 값, aria-pressed는 버튼의 선택 상태입니다. -->
+      <div class="toolbar">
+        <div class="levels" role="group" aria-label="난이도">
+          <button type="button" data-level="easy" aria-pressed="true">
+            초급 <span>9 × 9</span>
+          </button>
+          <button type="button" data-level="medium" aria-pressed="false">
+            중급 <span>16 × 16</span>
+          </button>
+          <button type="button" data-level="hard" aria-pressed="false">
+            고급 <span>30 × 16</span>
+          </button>
+        </div>
+        <button type="button" id="restart" class="restart">↻ <span>새 게임</span></button>
+      </div>
+
+      <!-- game.js가 각 id를 찾아 남은 지뢰, 상태 아이콘, 시간을 갱신합니다. -->
+      <div class="dashboard">
+        <div class="stat">
+          <span class="stat-label">⚑ 남은 지뢰</span>
+          <strong id="remaining">010</strong>
+        </div>
+        <div class="state-emblem" id="emblem" aria-hidden="true">✳</div>
+        <div class="stat stat-right">
+          <span class="stat-label">◷ 플레이 시간</span>
+          <strong><span id="timer">000</span><small>초</small></strong>
+        </div>
+      </div>
+
+      <!-- 칸 버튼은 game.js가 #board 안에 생성합니다. 넓은 게임판은 스크롤됩니다. -->
+      <div class="board-scroll" tabindex="0" aria-label="게임판 스크롤 영역">
+        <div id="board" class="board" role="group" aria-label="지뢰찾기 게임판"></div>
+      </div>
+
+      <!-- aria-live는 상태 메시지가 바뀌면 화면 낭독기에 알립니다. -->
+      <div class="game-footer">
+        <p id="status" role="status" aria-live="polite">
+          아무 칸이나 눌러 시작하세요. 첫 클릭은 안전해요.
+        </p>
+        <button type="button" id="flag-mode" aria-pressed="false">
+          ⚑ 깃발 모드 <span id="flag-label">OFF</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. 게임 방법 -->
+    <section class="guide" aria-label="게임 방법">
+      <div>
+        <span class="guide-number">01</span>
+        <p>
+          <strong>칸 열기</strong>
+          <span>클릭 또는 터치로 확인하세요.</span>
+        </p>
+      </div>
+      <div>
+        <span class="guide-number">02</span>
+        <p>
+          <strong>지뢰 표시</strong>
+          <span>오른쪽 클릭 또는 깃발 모드를 쓰세요.</span>
+        </p>
+      </div>
+      <div>
+        <span class="guide-number">03</span>
+        <p>
+          <strong>한 번에 열기</strong>
+          <span>주변 깃발 수가 숫자와 같으면 숫자를 좌클릭하세요. 깃발 위치가 틀리면 지뢰가 열려요.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- 4. 페이지 하단 -->
+    <footer class="page-footer">
+      <span>잠깐의 여유, 한 판의 집중.</span>
+      <span>행운을 빌어요 ✳</span>
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,528 @@
+@charset "UTF-8";
+
+/* 1. 공통 설정 — 기본 글꼴, 배경, 주요 색상 */
+:root {
+  font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  color: #263d35;
+  background: #f5f5ef;
+  font-synthesis: none;
+  /* 강조 색상과 보조 글자 색상: 여러 요소에서 var()로 사용합니다. */
+  --green: #245d46;
+  --muted: #78867b;
+}
+
+/* 2. 기본 요소와 키보드 포커스 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible, a:focus-visible, .board-scroll:focus-visible {
+  outline: 3px solid #df9b35;
+  outline-offset: 4px;
+}
+
+/* 3. 페이지 전체 너비와 여백 */
+.app {
+  max-width: 1040px;
+  margin: auto;
+  padding: 32px 36px 24px;
+}
+
+/* 4. 상단 로고와 게임 제목 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #dce1d6;
+  padding-bottom: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.brand-icon {
+  display: grid;
+  place-items: center;
+  background: var(--green);
+  color: #f0edb7;
+  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  font-size: 27px;
+}
+
+.edition {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+}
+
+.intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 40px 0 28px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+h1 {
+  font-size: 48px;
+  letter-spacing: -3px;
+  margin: 0;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+h1 span {
+  color: #d5a640;
+}
+
+.intro-note {
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--muted);
+}
+
+/* 5. 게임 카드와 난이도 선택 버튼 */
+.game {
+  background: #fffef9;
+  border: 1px solid #dce2d6;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px #2b473309;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e7eadf;
+  gap: 12px;
+}
+
+.levels {
+  display: flex;
+  padding: 4px;
+  gap: 4px;
+  background: #eff1e9;
+  border-radius: 10px;
+}
+
+.levels button {
+  border: 0;
+  background: transparent;
+  color: #778173;
+  padding: 10px 17px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.levels button span {
+  font-size: 10px;
+  font-weight: 400;
+  margin-left: 5px;
+}
+
+.levels button[aria-pressed=true] {
+  background: var(--green);
+  color: white;
+  box-shadow: 0 2px 4px #1a38241a;
+}
+
+.restart {
+  border: 1px solid #dce2d6;
+  background: transparent;
+  color: #3f5748;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 17px;
+}
+
+.restart span {
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+/* 6. 남은 지뢰, 타이머, 게임 상태 아이콘 */
+.dashboard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 26px 12px 22px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.stat strong {
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  font-family: Consolas, monospace;
+}
+
+.stat-right {
+  text-align: right;
+}
+
+.stat small {
+  font-size: 11px;
+  letter-spacing: 0;
+  margin-left: 5px;
+  color: var(--muted);
+  font-family: sans-serif;
+}
+
+.state-emblem {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  background: #f1f1d9;
+  border: 1px solid #e3e5bf;
+  color: #567145;
+  border-radius: 50%;
+  font-size: 34px;
+}
+
+/* 7. 게임판 — 화면보다 넓으면 가로 스크롤 */
+.board-scroll {
+  overflow: auto;
+  padding: 0 22px 28px;
+}
+
+.board {
+  /* --cell: 한 칸의 크기. --cols: game.js가 난이도에 맞춰 지정하는 열 수. */
+  --cell: 38px;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--cell));
+  gap: 4px;
+  background: #e4e9dd;
+  border: 7px solid #e4e9dd;
+  border-radius: 10px;
+  width: max-content;
+  margin: auto;
+}
+
+/* 8. 칸의 기본 모양과 상태별 표시 */
+.cell {
+  width: var(--cell);
+  height: var(--cell);
+  padding: 0;
+  border: 1px solid #b6c8aa;
+  border-bottom: 3px solid #a7bc99;
+  border-radius: 4px;
+  background: #cbdaba;
+  color: #214d3b;
+  font-family: Consolas, monospace;
+  font-size: 21px;
+  font-weight: 700;
+  touch-action: manipulation;
+  user-select: none;
+  transition: background .12s;
+}
+
+.cell:hover:not(.revealed):not(:disabled) {
+  background: #dce7cf;
+  transform: translateY(-1px);
+}
+
+/* JavaScript가 revealed, flagged 등의 클래스를 붙여 칸 상태를 바꿉니다. */
+.cell.revealed {
+  background: #f5f5ed;
+  border: 1px solid #d9e0d1;
+}
+
+.cell.flagged {
+  color: #255b44;
+  background: #e6dfac;
+  border-color: #cec58d;
+}
+
+.cell.mine {
+  background: #eacbba;
+  border-color: #d6ab95;
+}
+
+.cell.exploded {
+  background: #c96650;
+  color: white;
+}
+
+.cell.wrong {
+  color: #b14539;
+}
+
+/* 주변 지뢰 개수에 따라 숫자 색상 구분 */
+.cell[data-count="1"] {
+  color: #357a8b;
+}
+
+.cell[data-count="2"] {
+  color: #4d8248;
+}
+
+.cell[data-count="3"] {
+  color: #bd6b4b;
+}
+
+.cell[data-count="4"] {
+  color: #7862a2;
+}
+
+.cell[data-count="5"], .cell[data-count="6"], .cell[data-count="7"], .cell[data-count="8"] {
+  color: #9d4854;
+}
+
+/* 9. 안내 메시지와 모바일 깃발 모드 */
+.game-footer {
+  border-top: 1px solid #e7eadf;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fbfbf5;
+}
+
+#status {
+  font-size: 12px;
+  color: #6d7c69;
+  margin: 0;
+  line-height: 1.6;
+}
+
+#flag-mode {
+  white-space: nowrap;
+  border: 1px solid #dce2d6;
+  background: white;
+  border-radius: 8px;
+  padding: 9px 11px;
+  color: #536c51;
+  font-size: 11px;
+}
+
+#flag-label {
+  font-size: 9px;
+  background: #eef0e8;
+  padding: 3px 5px;
+  margin-left: 5px;
+  border-radius: 4px;
+}
+
+#flag-mode[aria-pressed=true] {
+  background: #e6dfac;
+  border-color: #cec58d;
+}
+
+/* 10. 게임 방법과 페이지 하단 */
+.guide {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 28px 4px;
+}
+
+.guide > div {
+  display: flex;
+  gap: 12px;
+}
+
+.guide-number {
+  color: #9aab91;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+  padding-top: 2px;
+}
+
+.guide p {
+  margin: 0;
+}
+
+.guide strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+
+.guide p > span {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.page-footer {
+  border-top: 1px solid #dce1d6;
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #94a08e;
+}
+
+/* 11. 승리와 패배 시 가운데 아이콘 색상 */
+.game.won .state-emblem {
+  background: #dbe9c4;
+}
+
+.game.lost .state-emblem {
+  background: #f0d6c9;
+  color: #b75840;
+}
+
+/* 12. 넓은 화면 — 고급 게임판 30열이 들어가도록 칸 축소 */
+@media (min-width: 1000px) {
+
+  .board[data-level=hard] {
+    --cell: 25px;
+    gap: 3px;
+  }
+
+  .board[data-level=hard] .cell {
+    font-size: 16px;
+  }
+}
+
+/* 13. 모바일 — 여백과 버튼 크기 조정, 안내를 세로로 배치 */
+@media (max-width: 640px) {
+
+  .app {
+    padding: 20px 16px;
+  }
+
+  .header {
+    padding-bottom: 18px;
+  }
+
+  .edition {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  .intro {
+    padding: 28px 0 22px;
+  }
+
+  h1 {
+    font-size: 38px;
+  }
+
+  .intro-note {
+    display: none;
+  }
+
+  .toolbar {
+    padding: 14px 12px;
+    gap: 6px;
+  }
+
+  .levels {
+    gap: 0;
+  }
+
+  .levels button {
+    padding: 9px 12px;
+  }
+
+  .levels button span {
+    display: none;
+  }
+
+  .restart {
+    padding: 6px 9px;
+  }
+
+  .restart span {
+    font-size: 11px;
+  }
+
+  .dashboard {
+    padding: 20px 18px;
+    max-width: 360px;
+  }
+
+  .board {
+    --cell: clamp(25px, 7.8vw, 38px);
+    gap: 3px;
+    border-width: 5px;
+  }
+
+  .board-scroll {
+    padding: 0 10px 20px;
+  }
+
+  .cell {
+    font-size: 18px;
+  }
+
+  .game-footer {
+    padding: 14px 12px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .guide {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 24px 4px;
+  }
+
+  .guide p {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .guide strong {
+    min-width: 54px;
+    margin: 0;
+  }
+
+  .page-footer {
+    padding-top: 16px;
+  }
+}
+
+/* 14. 접근성 — 움직임 줄이기를 설정한 사용자의 전환 효과 해제 */
+@media (prefers-reduced-motion: reduce) {
+
+  * {
+    transition: none!important;
+  }
+}
