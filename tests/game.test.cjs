@@ -2,6 +2,45 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { Minesweeper, LEVELS } = require('../dist/game.js');
 
+function metricBoard(rows) {
+  const game = new Minesweeper();
+  game.rows = rows.length;
+  game.cols = rows[0].length;
+  game.cells = rows.join('').split('').map(c => ({ mine: c === '*', open: false, flag: false, count: 0 }));
+  game.cells.forEach((cell, i) => { cell.count = game.neighbors(i).filter(n => game.cells[n].mine).length; });
+  return game;
+}
+
+test('3BV counts a completely empty board as one opening', () => {
+  assert.equal(metricBoard(['...', '...', '...']).calculate3BV(), 1);
+});
+
+test('3BV counts every safe number when there are no openings', () => {
+  assert.equal(metricBoard(['...', '.*.', '...']).calculate3BV(), 8);
+});
+
+test('3BV counts separate openings and isolated numbers', () => {
+  const game = metricBoard(['..*.*..']);
+  assert.equal(game.calculate3BV(), 3);
+  game.cells[0].open = true;
+  game.cells[3].flag = true;
+  const before = JSON.stringify(game.cells);
+  assert.equal(game.calculate3BV(), 3);
+  assert.equal(JSON.stringify(game.cells), before);
+});
+
+test('3BV is calculated on placement, preserved during play, and reset for a new game', () => {
+  const game = new Minesweeper('easy', () => 0.5);
+  assert.equal(game.bv3, null);
+  game.reveal(40);
+  const initial = game.bv3;
+  assert.ok(Number.isInteger(initial) && initial > 0);
+  assert.equal(initial, game.calculate3BV());
+  game.reveal(game.cells.findIndex(c => c.mine));
+  assert.equal(game.bv3, initial);
+  assert.equal(new Minesweeper().bv3, null);
+});
+
 for (const level of Object.keys(LEVELS)) {
   test(`${level}: safe opening, exact mine counts and consistent neighbor numbers`, () => {
     for (let seed = 1; seed <= 20; seed++) {

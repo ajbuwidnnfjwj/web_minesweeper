@@ -36,7 +36,7 @@ button:focus-visible, a:focus-visible, .board-scroll:focus-visible {
 
 /* 3. 페이지 전체 너비와 여백 */
 .app {
-  max-width: 1040px;
+  max-width: 1240px;
   margin: auto;
   padding: 32px 36px 24px;
 }
@@ -220,9 +220,41 @@ h1 span {
 }
 
 /* 7. 게임판 — 화면보다 넓으면 가로 스크롤 */
+.play-area {
+  display: grid;
+  /* Keep equal space on both sides so results never shift the board. */
+  grid-template-columns: 170px minmax(0, 1fr) 170px;
+  align-items: start;
+  gap: 22px;
+  padding: 0 24px 28px;
+}
+
+.game-stats {
+  grid-column: 3;
+  grid-row: 1;
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid #dce2d6;
+  border-radius: 14px;
+  background: #f6f7ef;
+}
+
+.game-stats[hidden] {
+  display: none;
+}
+
+.game-stats .stat strong {
+  font-size: 28px;
+  letter-spacing: 0;
+}
+
 .board-scroll {
+  grid-column: 2;
+  grid-row: 1;
   overflow: auto;
-  padding: 0 22px 28px;
+  min-width: 0;
+  padding: 0 0 8px;
 }
 
 .board {
@@ -324,6 +356,44 @@ h1 span {
   color: #6d7c69;
   margin: 0;
   line-height: 1.6;
+  white-space: pre-line;
+}
+
+.bv3-help {
+  position: relative;
+  display: inline-block;
+  white-space: normal;
+}
+
+.bv3-trigger {
+  border: 0;
+  border-bottom: 1px dotted currentColor;
+  padding: 0;
+  background: transparent;
+  color: #405c3e;
+  font: inherit;
+  cursor: help;
+}
+
+.bv3-tooltip {
+  position: absolute;
+  z-index: 10;
+  bottom: 100%;
+  right: 0;
+  box-sizing: border-box;
+  width: min(280px, calc(100vw - 100px));
+  padding: 14px 16px;
+  border: 1px solid #dce2d6;
+  border-radius: 12px;
+  background: #fffef9;
+  color: #40513c;
+  box-shadow: 0 6px 24px #2b473326;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 1.7;
+  white-space: pre-line;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 #flag-mode {
@@ -419,6 +489,33 @@ h1 span {
 }
 
 /* 13. 모바일 — 여백과 버튼 크기 조정, 안내를 세로로 배치 */
+@media (max-width: 760px) {
+  .play-area {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0 12px 20px;
+    gap: 16px;
+  }
+
+  .game-stats {
+    grid-column: 1;
+    grid-row: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .board-scroll {
+    grid-column: 1;
+  }
+
+  .bv3-tooltip {
+    top: auto;
+    bottom: 100%;
+    right: auto;
+    left: 0;
+  }
+}
+
 @media (max-width: 640px) {
 
   .app {
@@ -483,7 +580,7 @@ h1 span {
   }
 
   .board-scroll {
-    padding: 0 10px 20px;
+    padding: 0 0 8px;
   }
 
   .cell {

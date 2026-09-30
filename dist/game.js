@@ -10,6 +10,8 @@ class Minesweeper {
     this.flags = 0;
     this.opened = 0;
     this.cells = Array.from({ length: this.rows * this.cols }, () => ({ mine: false, open: false, flag: false, count: 0 }));
+    this.click_num = 0;
+    this.bv3 = null;
   }
   neighbors(index) {
     const result = [], row = Math.floor(index / this.cols), col = index % this.cols;
@@ -28,7 +30,32 @@ class Minesweeper {
     }
     choices.slice(0, this.mines).forEach(i => { this.cells[i].mine = true; });
     this.cells.forEach((cell, i) => { cell.count = this.neighbors(i).filter(n => this.cells[n].mine).length; });
+    this.bv3 = this.calculate3BV();
     this.state = "playing";
+  }
+  calculate3BV() {
+    // 3BV = connected zero regions + numbers not opened by any zero region.
+    // Flags and currently open cells do not affect this board metric.
+    const covered = new Set();
+    let total = 0;
+    this.cells.forEach((cell, index) => {
+      if (cell.mine || cell.count || covered.has(index)) return;
+      total++;
+      covered.add(index);
+      const pending = [index];
+      while (pending.length) {
+        for (const neighbor of this.neighbors(pending.pop())) {
+          const next = this.cells[neighbor];
+          if (next.mine || covered.has(neighbor)) continue;
+          covered.add(neighbor);
+          if (next.count === 0) pending.push(neighbor);
+        }
+      }
+    });
+    this.cells.forEach((cell, index) => {
+      if (!cell.mine && !covered.has(index)) total++;
+    });
+    return total;
   }
   toggleFlag(index) {
     const cell = this.cells[index];
@@ -76,8 +103,34 @@ if (typeof document !== "undefined") {
   let game, level = "easy", flagMode = false, interval = null, startedAt = 0;
   function stopTimer() { clearInterval(interval); interval = null; }
   function updateTime() { timer.textContent = String(Math.floor((Date.now() - startedAt) / 1000)).padStart(3, "0"); }
+  function create3BVHelp() {
+    const help = document.createElement("span");
+    help.className = "bv3-help";
+    const label = document.createElement("span");
+    label.className = "bv3-trigger";
+    label.textContent = "3BV ⓘ";
+    label.setAttribute("aria-describedby", "bv3-tooltip");
+    const tooltip = document.createElement("span");
+    tooltip.id = "bv3-tooltip";
+    tooltip.className = "bv3-tooltip";
+    tooltip.setAttribute("role", "tooltip");
+    tooltip.textContent = "3BV는 지뢰 위치를 모두 안다고 가정할 때, 깃발과 숫자 칸의 ‘한 번에 열기’를 쓰지 않고 모든 안전한 칸을 여는 데 필요한 최소 클릭 수예요.\n\n한 번에 열리는 빈 영역은 1회, 그 밖의 숫자 칸은 각각 1회로 계산해요. 실제 클릭 수와는 다른, 게임판 자체의 수치예요.";
+    tooltip.hidden = true;
+    help.append(label, tooltip);
+    help.addEventListener("pointerenter", event => {
+      if (event.pointerType === "mouse") tooltip.hidden = false;
+    });
+    help.addEventListener("pointerleave", () => { tooltip.hidden = true; });
+    return help;
+  }
   function draw() {
     remaining.textContent = String(game.mines - game.flags).padStart(3, "0");
+    document.querySelector("#stat-board").hidden = !game.finished;
+    document.querySelector("#result-time").textContent = timer.textContent;
+    document.querySelector("#click-count").textContent = game.click_num;
+    document.querySelector("#bv3-value").textContent = game.bv3 ?? "—";
+    document.querySelector("#efficiency").textContent = game.state === "won" && game.click_num > 0
+      ? `${(game.bv3 * 100 / game.click_num).toFixed(1)}%` : "—";
     document.querySelector(".game").classList.toggle("won", game.state === "won");
     document.querySelector(".game").classList.toggle("lost", game.state === "lost");
     game.cells.forEach((cell, i) => {
@@ -98,11 +151,12 @@ if (typeof document !== "undefined") {
     document.querySelector("#emblem").textContent = game.state === "won" ? "✓" : game.state === "lost" ? "×" : "✳";
     if (game.finished) {
       stopTimer();
-      status.textContent = game.state === "won" ? `성공! ${timer.textContent}초 만에 모든 안전한 칸을 찾았어요.` : "앗, 지뢰예요! 새 게임으로 다시 도전해 보세요.";
+      status.textContent = game.state === "won" ? "성공! 모든 안전한 칸을 찾았어요." : "펑!";
     } else status.textContent = game.state === "ready" ? "아무 칸이나 눌러 시작하세요. 첫 클릭은 안전해요." : "숫자는 주변 8칸의 지뢰 개수예요. 차근차근 찾아보세요.";
   }
   function reset() {
     stopTimer(); timer.textContent = "000"; game = new Minesweeper(level);
+    document.querySelector("#bv3-label").replaceChildren(create3BVHelp());
     flagMode = false; modeButton.setAttribute("aria-pressed", "false"); document.querySelector("#flag-label").textContent = "OFF";
     board.style.setProperty("--cols", game.cols); board.dataset.level = level;
     board.replaceChildren(...game.cells.map((_, i) => {
@@ -111,6 +165,8 @@ if (typeof document !== "undefined") {
     board.parentElement.scrollLeft = 0; draw();
   }
   function act(index, flag) {
+    if (game.finished || !game.cells[index]) return;
+    game.click_num++;
     const wasReady = game.state === "ready";
     if (!flag && game.cells[index]?.open) game.chord(index);
     else if (flag) game.toggleFlag(index);

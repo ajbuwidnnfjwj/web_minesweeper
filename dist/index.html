@@ -61,8 +61,28 @@
       </div>
 
       <!-- 칸 버튼은 game.js가 #board 안에 생성합니다. 넓은 게임판은 스크롤됩니다. -->
-      <div class="board-scroll" tabindex="0" aria-label="게임판 스크롤 영역">
-        <div id="board" class="board" role="group" aria-label="지뢰찾기 게임판"></div>
+      <div class="play-area">
+        <div class="board-scroll" tabindex="0" aria-label="게임판 스크롤 영역">
+          <div id="board" class="board" role="group" aria-label="지뢰찾기 게임판"></div>
+        </div>
+        <aside id="stat-board" class="game-stats" aria-label="플레이 기록" hidden>
+          <div class="stat">
+            <span class="stat-label">소요 시간</span>
+            <strong><span id="result-time">000</span><small>초</small></strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label">클릭 수</span>
+            <strong id="click-count">0</strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label" id="bv3-label"></span>
+            <strong id="bv3-value">—</strong>
+          </div>
+          <div class="stat">
+            <span class="stat-label">효율 · 성공 시</span>
+            <strong id="efficiency">—</strong>
+          </div>
+        </aside>
       </div>
 
       <!-- aria-live는 상태 메시지가 바뀌면 화면 낭독기에 알립니다. -->
